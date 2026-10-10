@@ -267,16 +267,17 @@ function parseN8nResponse(data) {
  * Transmits payload to configured n8n endpoint or falls back to demo mode
  */
 async function sendToBackend(messageText) {
-  const endpoint = CONFIG.n8nWebhookUrl ? CONFIG.n8nWebhookUrl.trim() : "";
+  const endpoint = CONFIG.n8nWebhookUrl
+    ? CONFIG.n8nWebhookUrl.trim()
+    : "";
 
-  // Demo Mode branch
   if (!endpoint) {
     await new Promise(resolve => setTimeout(resolve, 800));
     return getDemoResponse(messageText, currentMode);
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+  const timeoutId = setTimeout(() => controller.abort(), 25000);
 
   try {
     const response = await fetch(endpoint, {
@@ -286,37 +287,43 @@ async function sendToBackend(messageText) {
         "Accept": "application/json, text/plain, */*"
       },
       body: JSON.stringify({
+        action: "sendMessage",
         sessionId: CONFIG.sessionId,
-        message: messageText,
-        mode: currentMode,
-        timestamp: new Date().toISOString()
+        chatInput: messageText
       }),
       signal: controller.signal
     });
 
-    clearTimeout(timeoutId);
-
     if (!response.ok) {
-      throw new Error(`Endpoint returned HTTP ${response.status} (${response.statusText || "Request failed"})`);
+      throw new Error(
+        `n8n returned HTTP ${response.status}. Check the workflow and Chat URL.`
+      );
     }
 
     const contentType = response.headers.get("content-type") || "";
-    if (contentType.includes("application/json")) {
-      const data = await response.json();
-      return parseN8nResponse(data);
-    } else {
-      const text = await response.text();
-      return text.trim() || "Received empty response from server.";
+    const data = contentType.includes("application/json")
+      ? await response.json()
+      : await response.text();
+
+    const reply = parseN8nResponse(data);
+
+    if (!reply) {
+      throw new Error("n8n returned an empty response.");
     }
+
+    return reply;
   } catch (error) {
-    clearTimeout(timeoutId);
     if (error.name === "AbortError") {
-      throw new Error("Request timed out. Please verify your n8n workflow is executing promptly.");
+      throw new Error("Request timed out. Please check your n8n workflow.");
     }
+
     console.error("Backend dispatch error:", error);
-    throw new Error(error.message || "Failed to establish connection with security backend.");
+    throw new Error(error.message || "Could not connect to n8n.");
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
+
 
 // Event Listeners for Nav Modes
 document.querySelectorAll(".nav-item").forEach(button => {
