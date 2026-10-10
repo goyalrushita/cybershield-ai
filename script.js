@@ -6,7 +6,7 @@
 // Keep this empty until you are ready to connect your production n8n workflow.
 // Example: "https://your-n8n-instance.com/webhook/cybershield-chat"
 const CONFIG = {
-  n8nWebhookUrl: "",
+  n8nWebhookUrl: "https://goyalrushita.app.n8n.cloud/webhook/4c069cf8-0b56-4f6c-86dc-c7e50f65fb7e/chat",
   sessionId: (typeof crypto !== "undefined" && crypto.randomUUID)
     ? crypto.randomUUID()
     : "session-" + Math.random().toString(36).substring(2, 11)
