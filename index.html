@@ -127,6 +127,34 @@
     </main>
   </div>
 
+
   <script src="script.js"></script>
+
+  <!-- n8n Chat Widget -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css"
+    rel="stylesheet"
+  />
+
+  <script type="module">
+    import { createChat } from
+      'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+    createChat({
+      webhookUrl: https://goyalrushita.app.n8n.cloud/webhook/4c069cf8-0b56-4f6c-86dc-c7e50f65fb7e/chat,
+      mode: 'window',
+      initialMessages: [
+        'Hi! I am CyberShield AI.',
+        'Ask me about phishing, passwords, or online safety.'
+      ],
+      i18n: {
+        en: {
+          title: 'CyberShield AI',
+          subtitle: 'Your cybersecurity awareness assistant',
+          inputPlaceholder: 'Ask a cybersecurity question...'
+        }
+      }
+    });
+  </script>
 </body>
 </html>
